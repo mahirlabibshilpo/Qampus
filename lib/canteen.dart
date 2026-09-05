@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'models/queue_service.dart';
 
+// Library er moto pattern follow kore canteen er jonno banano hoyeche
 class CanteenItem {
   final String name;
   final String category;
   final String price;
   final String status;
-  final int available;
 
-  const CanteenItem(this.name, this.category, this.price, this.status, this.available);
+  const CanteenItem(this.name, this.category, this.price, this.status);
 }
 
 class CanteenPage extends StatefulWidget {
@@ -26,47 +26,40 @@ class _CanteenPageState extends State<CanteenPage> {
   Map<String, dynamic>? _token;
 
   final List<CanteenItem> _menuItems = const [
-    CanteenItem('Chicken Biryani Platter', 'Lunch & Dinner', '\$4.50', 'Available', 15),
-    CanteenItem('Vegetable Fried Rice', 'Lunch & Dinner', '\$3.00', 'Available', 8),
-    CanteenItem('Grilled Chicken Sandwich', 'Snacks', '\$2.50', 'Available', 12),
-    CanteenItem('Beef Cheeseburger', 'Fast Food', '\$3.80', 'Unavailable', 0),
-    CanteenItem('Cold Coffee & Muffin', 'Beverages & Bakery', '\$2.00', 'Available', 20),
-    CanteenItem('Samosa & Chai Combo', 'Snacks', '\$1.50', 'Available', 25),
+    CanteenItem('Chicken Biryani Platter', 'Lunch & Dinner', '\$4.50', 'Available'),
+    CanteenItem('Vegetable Fried Rice', 'Lunch & Dinner', '\$3.00', 'Available'),
+    CanteenItem('Grilled Chicken Sandwich', 'Snacks', '\$2.50', 'Available'),
+    CanteenItem('Beef Cheeseburger', 'Fast Food', '\$3.80', 'Unavailable'),
+    CanteenItem('Cold Coffee & Muffin', 'Beverages & Bakery', '\$2.00', 'Available'),
+    CanteenItem('Samosa & Chai Combo', 'Snacks', '\$1.50', 'Available'),
   ];
 
+  // canteen entry queue_service.dart theke asche
   @override
   void initState() {
     super.initState();
-    _queueService = QueueService.defaultServices().firstWhere(
-      (s) => s.id == 'canteen',
-      orElse: () => const QueueService(
-        id: 'canteen',
-        name: 'Canteen',
-        subtitle: 'Grab a digital token — no more standing in line.',
-        icon: Icons.restaurant_rounded,
-        codePrefix: 'CANTEEN C',
-        currentQueueLength: 7,
-        avgWaitPerPerson: 2,
-      ),
-    );
+    _queueService = QueueService.defaultServices().firstWhere((s) => s.id == 'canteen');
+    _token = _buildToken('042', 'Chicken Biryani Platter');
+  }
 
+  // token map ekbar e banano jate baar baar likhte na hoy
+  Map<String, dynamic> _buildToken(String number, String itemName) {
     final prefix = _queueService.codePrefix.split(' ').last;
-    final waitMinutes = _queueService.currentQueueLength * _queueService.avgWaitPerPerson;
-    _token = {
-      'number': '$prefix-042',
-      'item': 'Chicken Biryani Platter',
+    final wait = _queueService.currentQueueLength * _queueService.avgWaitPerPerson;
+    return {
+      'number': '$prefix-$number',
+      'item': itemName,
       'serving': '$prefix-035',
       'position': _queueService.currentQueueLength + 1,
       'ahead': _queueService.currentQueueLength,
-      'wait': '$waitMinutes mins',
+      'wait': '$wait mins',
     };
   }
 
   List<CanteenItem> get _filteredMenuItems {
-    return _menuItems.where((item) {
-      final q = _searchQuery.toLowerCase();
-      return item.name.toLowerCase().contains(q) || item.category.toLowerCase().contains(q);
-    }).toList();
+    final q = _searchQuery.toLowerCase();
+    return _menuItems.where((item) =>
+        item.name.toLowerCase().contains(q) || item.category.toLowerCase().contains(q)).toList();
   }
 
   void _getToken(CanteenItem item) {
@@ -76,18 +69,7 @@ class _CanteenPageState extends State<CanteenPage> {
       );
       return;
     }
-    final prefix = _queueService.codePrefix.split(' ').last;
-    final waitMinutes = _queueService.currentQueueLength * _queueService.avgWaitPerPerson;
-    setState(() {
-      _token = {
-        'number': '$prefix-043',
-        'item': item.name,
-        'serving': '$prefix-035',
-        'position': _queueService.currentQueueLength + 1,
-        'ahead': _queueService.currentQueueLength,
-        'wait': '$waitMinutes mins',
-      };
-    });
+    setState(() => _token = _buildToken('043', item.name));
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Token ${_token!['number']} issued for ${item.name}!'),
@@ -103,15 +85,9 @@ class _CanteenPageState extends State<CanteenPage> {
         title: const Text('Cancel Token'),
         content: const Text('Are you sure you want to cancel your queue token?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('No'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text('No')),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
-            ),
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
             onPressed: () {
               Navigator.pop(context);
               setState(() => _token = null);
@@ -207,10 +183,7 @@ class _CanteenPageState extends State<CanteenPage> {
             if (_token != null)
               Card(
                 color: Colors.green.shade50,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: const BorderSide(color: Colors.green),
-                ),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12), side: const BorderSide(color: Colors.green)),
                 child: Padding(
                   padding: const EdgeInsets.all(14),
                   child: Column(
@@ -220,10 +193,7 @@ class _CanteenPageState extends State<CanteenPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Text('TOKEN #${_token!['number']}', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.green)),
-                          TextButton(
-                            onPressed: _cancelToken,
-                            child: const Text('Cancel Token', style: TextStyle(color: Colors.red)),
-                          ),
+                          TextButton(onPressed: _cancelToken, child: const Text('Cancel Token', style: TextStyle(color: Colors.red))),
                         ],
                       ),
                       Text('Item: ${_token!['item']}', style: const TextStyle(fontWeight: FontWeight.w600)),
@@ -239,10 +209,7 @@ class _CanteenPageState extends State<CanteenPage> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 child: const Padding(
                   padding: EdgeInsets.all(14),
-                  child: Text(
-                    'No active token. Tap "Get Token" on any menu item below to join queue.',
-                    style: TextStyle(color: Colors.black54),
-                  ),
+                  child: Text('No active token. Tap "Get Token" on any menu item below to join queue.', style: TextStyle(color: Colors.black54)),
                 ),
               ),
             const SizedBox(height: 20),
@@ -269,10 +236,7 @@ class _CanteenPageState extends State<CanteenPage> {
                 margin: const EdgeInsets.only(bottom: 10),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                 child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.green.shade50,
-                    child: const Icon(Icons.restaurant, color: Colors.green),
-                  ),
+                  leading: CircleAvatar(backgroundColor: Colors.green.shade50, child: const Icon(Icons.restaurant, color: Colors.green)),
                   title: Text(item.name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -282,11 +246,7 @@ class _CanteenPageState extends State<CanteenPage> {
                     ],
                   ),
                   trailing: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: isAvailable ? Colors.green : Colors.grey,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                    ),
+                    style: ElevatedButton.styleFrom(backgroundColor: isAvailable ? Colors.green : Colors.grey, foregroundColor: Colors.white, padding: const EdgeInsets.symmetric(horizontal: 10)),
                     onPressed: () => _getToken(item),
                     child: Text(isAvailable ? 'Get Token' : 'Unavailable', style: const TextStyle(fontSize: 12)),
                   ),
