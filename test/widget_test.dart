@@ -43,7 +43,7 @@ void main() {
     );
 
     // Tap Library service card
-    final libraryFinder = find.text('Hours, books & rules');
+    final libraryFinder = find.text('Library');
     await tester.scrollUntilVisible(libraryFinder, 300, scrollable: find.byType(Scrollable).first);
     await tester.tap(libraryFinder);
     await tester.pumpAndSettle();
