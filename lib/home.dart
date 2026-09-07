@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'auth_service.dart';
 import 'canteen.dart';
 import 'library.dart';
 import 'login.dart';
+import 'club_office.dart';
+import 'administrative_office.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
@@ -27,7 +30,10 @@ class HomePage extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
-        title: const Text('QAMPUS - Home', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'QAMPUS - Home',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -97,7 +103,11 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 25),
             const Text(
               'Campus Services',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
             ),
             const SizedBox(height: 15),
             _buildServiceCard(
@@ -126,7 +136,12 @@ class HomePage extends StatelessWidget {
               icon: Icons.groups,
               title: 'Club Office',
               subtitle: 'Student activity & event registration',
-              onTap: () => _showComingSoon(context, 'Club Office'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ClubOffice()),
+                );
+              },
             ),
             _buildServiceCard(
               icon: Icons.campaign,
@@ -138,7 +153,14 @@ class HomePage extends StatelessWidget {
               icon: Icons.account_balance,
               title: 'Administrative Office',
               subtitle: 'Student ID, fees & official documents',
-              onTap: () => _showComingSoon(context, 'Administrative Office'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AdministrativeOffice(),
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -171,7 +193,10 @@ class HomePage extends StatelessWidget {
 
   void _showComingSoon(BuildContext context, String service) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$service service selected!'), duration: const Duration(seconds: 1)),
+      SnackBar(
+        content: Text('$service service selected!'),
+        duration: const Duration(seconds: 1),
+      ),
     );
   }
 
@@ -182,7 +207,10 @@ class HomePage extends StatelessWidget {
         title: const Text('Logout'),
         content: const Text('Are you sure you want to logout?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.deepOrange.shade900,
