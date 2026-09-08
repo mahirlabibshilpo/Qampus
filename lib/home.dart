@@ -7,6 +7,7 @@ import 'library.dart';
 import 'login.dart';
 import 'club_office.dart';
 import 'administrative_office.dart';
+import 'notice_board.dart';
 
 
 
@@ -182,7 +183,7 @@ class HomePage extends StatelessWidget {
               icon: Icons.campaign,
               title: 'Notice Board',
               subtitle: 'Important university notices & announcements',
-              onTap: () => _comingSoon(context, 'Notice Board'),
+              onTap: () { Navigator.push( context, MaterialPageRoute(builder: (context) => const NoticeBoard()), ); },
             ),
 
 
