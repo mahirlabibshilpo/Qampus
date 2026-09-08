@@ -35,7 +35,7 @@ class _CanteenPageState extends State<CanteenPage> {
     CanteenItem('Samosa & Chai Combo', 'Snacks', '\$1.50', 'Available'),
   ];
 
-  // token cancel korar jonno popup
+  
   void showCancelTokenDialog() {
     showDialog(
       context: context,
