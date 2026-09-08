@@ -20,12 +20,12 @@ class _CanteenPageState extends State<CanteenPage> {
 
   String searchQuery = '';
 
-  // active token er info
+ 
   bool hasToken = true;
   String tokenNumber = 'C-042';
   String activeItem = 'Chicken Biryani Platter';
 
-  // sob menu item er list
+  
   final List<CanteenItem> menuItems = const [
     CanteenItem('Chicken Biryani Platter', 'Lunch & Dinner', '\$4.50', 'Available'),
     CanteenItem('Vegetable Fried Rice', 'Lunch & Dinner', '\$3.00', 'Available'),
@@ -68,7 +68,7 @@ class _CanteenPageState extends State<CanteenPage> {
   @override
   Widget build(BuildContext context) {
 
-    final filteredItems = menuItems.where((item) {    // search filter logic
+    final filteredItems = menuItems.where((item) {    
 
       final query = searchQuery.toLowerCase();
       return item.name.toLowerCase().contains(query) ||
@@ -113,7 +113,7 @@ class _CanteenPageState extends State<CanteenPage> {
 
             const SizedBox(height: 14),
 
-            // now serving card
+            
             Card(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
               child: Padding(
