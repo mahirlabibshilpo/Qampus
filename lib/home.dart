@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'auth_service.dart';
 import 'canteen.dart';
+import 'club_office.dart';
 import 'library.dart';
 import 'login.dart';
 
@@ -126,7 +127,12 @@ class HomePage extends StatelessWidget {
               icon: Icons.groups,
               title: 'Club Office',
               subtitle: 'Student activity & event registration',
-              onTap: () => _showComingSoon(context, 'Club Office'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ClubOfficePage()),
+                );
+              },
             ),
             _buildServiceCard(
               icon: Icons.campaign,

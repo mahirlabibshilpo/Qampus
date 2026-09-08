@@ -97,5 +97,50 @@ void main() {
     // Verify new token is generated
     expect(find.text('TOKEN #C-043'), findsOneWidget);
   });
+
+  testWidgets('ClubOfficePage - navigation, queue status, active token, cancel and register token', (WidgetTester tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: HomePage(),
+      ),
+    );
+
+    // Tap Club Office service card from HomePage
+    final clubFinder = find.text('Club Office');
+    await tester.scrollUntilVisible(clubFinder, 300, scrollable: find.byType(Scrollable).first);
+    await tester.tap(clubFinder);
+    await tester.pumpAndSettle();
+
+    // Verify Club Office Services page opens
+    expect(find.text('Club Office Services'), findsOneWidget);
+    expect(find.text('STUDENT CLUB OFFICE'), findsOneWidget);
+    expect(find.text('Live Queue Status'), findsOneWidget);
+    expect(find.text('2 in Queue'), findsOneWidget);
+    expect(find.textContaining('CLUB O'), findsWidgets);
+    expect(find.text('Club Events & Activities'), findsOneWidget);
+
+    // Verify active token details
+    expect(find.text('TOKEN #O-012'), findsOneWidget);
+    expect(find.text('Event: Robotics Workshop 2026'), findsOneWidget);
+    expect(find.text('People Ahead: 2  |  Est. Wait: 8 mins'), findsOneWidget);
+
+    // Test Cancel Token dialog
+    await tester.tap(find.text('Cancel Token'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Are you sure you want to cancel your queue token?'), findsOneWidget);
+    await tester.tap(find.text('Yes, Cancel'));
+    await tester.pumpAndSettle();
+
+    // Verify token is cancelled
+    expect(find.text('No active token. Tap "Register" on any club event below to join queue.'), findsOneWidget);
+
+    // Test Register on available event
+    await tester.tap(find.widgetWithText(ElevatedButton, 'Register').first);
+    await tester.pumpAndSettle();
+
+    // Verify new token is generated
+    expect(find.text('TOKEN #O-013'), findsOneWidget);
+  });
 }
 
