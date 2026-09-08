@@ -1,5 +1,5 @@
 // Temporary Local Authentication Service
-// (Sir ke explain kora shohoj: Firebase chara local testing er jonno simple auth manager)
+// Firebase chara local testing er jonno simple auth manager
 
 class AuthService {
   // Singleton instance - sob page theke eki data access kora jabe

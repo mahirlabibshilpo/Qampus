@@ -1,15 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'auth_service.dart';
 import 'canteen.dart';
-import 'club_office.dart';
 import 'library.dart';
 import 'login.dart';
+import 'club_office.dart';
+import 'administrative_office.dart';
+
+
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  String _getUserEmail() {
+
+
+
+  // user email check
+  String _getEmail() {
     try {
       return FirebaseAuth.instance.currentUser?.email ??
           AuthService().currentUserEmail ??
@@ -19,21 +27,27 @@ class HomePage extends StatelessWidget {
     }
   }
 
+
+
+
   @override
   Widget build(BuildContext context) {
-    String userEmail = _getUserEmail();
+    String userEmail = _getEmail();
 
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: AppBar(
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
-        title: const Text('QAMPUS - Home', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'QAMPUS - Home',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
             tooltip: 'Logout',
-            onPressed: () => _showLogoutDialog(context),
+            onPressed: () => _logout(context),
           ),
         ],
       ),
@@ -42,6 +56,8 @@ class HomePage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+
+            // user info card
             Card(
               color: Colors.green.shade50,
               elevation: 10,
@@ -95,13 +111,28 @@ class HomePage extends StatelessWidget {
                 ),
               ),
             ),
+
+
+
+
             const SizedBox(height: 25),
+
+            // services title
             const Text(
               'Campus Services',
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black87),
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
             ),
             const SizedBox(height: 15),
-            _buildServiceCard(
+
+
+
+
+            // library service
+            _serviceCard(
               icon: Icons.menu_book,
               title: 'Library',
               subtitle: 'Books issue, return & study room access',
@@ -112,7 +143,12 @@ class HomePage extends StatelessWidget {
                 );
               },
             ),
-            _buildServiceCard(
+
+
+
+
+            // canteen service
+            _serviceCard(
               icon: Icons.restaurant,
               title: 'Canteen',
               subtitle: 'Cafeteria tokens & meal schedule',
@@ -123,28 +159,47 @@ class HomePage extends StatelessWidget {
                 );
               },
             ),
-            _buildServiceCard(
+
+
+
+
+            _serviceCard(
               icon: Icons.groups,
               title: 'Club Office',
               subtitle: 'Student activity & event registration',
               onTap: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ClubOfficePage()),
+                  MaterialPageRoute(builder: (context) => const ClubOffice()),
                 );
               },
             ),
-            _buildServiceCard(
+
+
+
+
+            _serviceCard(
               icon: Icons.campaign,
               title: 'Notice Board',
               subtitle: 'Important university notices & announcements',
-              onTap: () => _showComingSoon(context, 'Notice Board'),
+              onTap: () => _comingSoon(context, 'Notice Board'),
             ),
-            _buildServiceCard(
+
+
+
+
+            _serviceCard(
               icon: Icons.account_balance,
               title: 'Administrative Office',
               subtitle: 'Student ID, fees & official documents',
-              onTap: () => _showComingSoon(context, 'Administrative Office'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const AdministrativeOffice(),
+                  ),
+                );
+              },
             ),
           ],
         ),
@@ -152,7 +207,11 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildServiceCard({
+
+
+
+  // service card design
+  Widget _serviceCard({
     required IconData icon,
     required String title,
     required String subtitle,
@@ -175,20 +234,34 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  void _showComingSoon(BuildContext context, String service) {
+
+
+
+  // coming soon snackbar
+  void _comingSoon(BuildContext context, String service) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text('$service service selected!'), duration: const Duration(seconds: 1)),
+      SnackBar(
+        content: Text('$service service selected!'),
+        duration: const Duration(seconds: 1),
+      ),
     );
   }
 
-  void _showLogoutDialog(BuildContext context) {
+
+
+
+  // logout alert dialog
+  void _logout(BuildContext context) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Logout'),
         content: const Text('Are you sure you want to logout?'),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.deepOrange.shade900,
@@ -215,7 +288,9 @@ class HomePage extends StatelessWidget {
   }
 }
 
-// Alias for backwards compatibility if referenced elsewhere
+
+
+
 class MyHomePage extends StatelessWidget {
   final String title;
   const MyHomePage({super.key, required this.title});

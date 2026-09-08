@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 import 'login.dart';
 
+
+
 class Splash extends StatefulWidget {
   const Splash({super.key});
 
@@ -9,8 +11,14 @@ class Splash extends StatefulWidget {
   State<Splash> createState() => _SplashState();
 }
 
+
+
 class _SplashState extends State<Splash> {
+
   bool _navigated = false;
+
+
+
 
   @override
   void initState() {
@@ -18,6 +26,10 @@ class _SplashState extends State<Splash> {
     _navigateToLogin();
   }
 
+
+
+
+  // login page e jaoar delay
   Future<void> _navigateToLogin() async {
     await Future.delayed(const Duration(milliseconds: 1800));
     if (_navigated || !mounted) return;
@@ -29,6 +41,9 @@ class _SplashState extends State<Splash> {
       ),
     );
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {
