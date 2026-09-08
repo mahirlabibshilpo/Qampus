@@ -19,7 +19,7 @@ class NoticeBoard extends StatelessWidget {
 
 
 
-  // list of all notices
+  
   final List<Notice> _notices = const [
     Notice(
       Icons.event_note,
@@ -73,11 +73,6 @@ class NoticeBoard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
-
-
-
-            // header info card
             Card(
               color: Colors.green.shade50,
               elevation: 10,
@@ -133,11 +128,6 @@ class NoticeBoard extends StatelessWidget {
             ),
 
             const SizedBox(height: 25),
-
-
-
-
-            // notices title
             const Text(
               'Recent Notices',
               style: TextStyle(
@@ -147,11 +137,6 @@ class NoticeBoard extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 15),
-
-
-
-
-            // notice cards from list
             for (var notice in _notices)
               _noticeCard(
                 icon: notice.icon,
@@ -165,11 +150,6 @@ class NoticeBoard extends StatelessWidget {
       ),
     );
   }
-
-
-
-
-  // notice card design
   Widget _noticeCard({
     required IconData icon,
     required String title,
@@ -197,7 +177,6 @@ class NoticeBoard extends StatelessWidget {
 
 
 
-  // notice details popup
   void _showNoticeDetails(BuildContext context, Notice notice) {
     showDialog(
       context: context,
