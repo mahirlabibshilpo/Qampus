@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-
 class CanteenPage extends StatefulWidget {
   const CanteenPage({super.key});
   @override
