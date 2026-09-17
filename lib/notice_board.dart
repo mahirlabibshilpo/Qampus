@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-
 class NoticeBoard extends StatelessWidget {
   const NoticeBoard({super.key});
-
-  // Notice er title list
   final List<String> titles = const [
     'Semester Final Exam Routine',
     'University Closed - Holiday',
@@ -11,8 +8,6 @@ class NoticeBoard extends StatelessWidget {
     'Fee Payment Date Extended',
     'Club Fair Registration Open',
   ];
-
-  // Notice er date list
   final List<String> dates = const [
     'Sep 05, 2026',
     'Sep 02, 2026',
@@ -20,8 +15,6 @@ class NoticeBoard extends StatelessWidget {
     'Aug 20, 2026',
     'Aug 15, 2026',
   ];
-
-  // Notice er details list
   final List<String> details = const [
     'Final exam schedule for all departments is published.',
     'Campus will remain closed on national holiday.',
@@ -29,8 +22,6 @@ class NoticeBoard extends StatelessWidget {
     'Semester fee payment deadline extended by one week.',
     'Students can register their clubs for the club fair.',
   ];
-
-  // Notice click korle popup dekhabe
   void showDetails(BuildContext context, int index) {
     showDialog(
       context: context,
@@ -46,7 +37,6 @@ class NoticeBoard extends StatelessWidget {
       ),
     );
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
