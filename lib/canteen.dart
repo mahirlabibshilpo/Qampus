@@ -6,7 +6,6 @@ class CanteenPage extends StatefulWidget {
   State<CanteenPage> createState() => _CanteenPageState();
 }
 class _CanteenPageState extends State<CanteenPage> {
-  // Canteen er food list
   final List<String> foods = [
     'Chicken Biryani',
     'Vegetable Fried Rice',
