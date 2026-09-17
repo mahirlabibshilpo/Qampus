@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 
 class CanteenPage extends StatefulWidget {
   const CanteenPage({super.key});
-
   @override
   State<CanteenPage> createState() => _CanteenPageState();
 }
-
 class _CanteenPageState extends State<CanteenPage> {
   // Canteen er food list
   final List<String> foods = [
@@ -16,19 +14,13 @@ class _CanteenPageState extends State<CanteenPage> {
     'Beef Burger',
     'Cold Coffee',
   ];
-
   final List<String> prices = ['120 Tk', '100 Tk', '80 Tk', '90 Tk', '60 Tk'];
-
-  // Student je token nibe
   String myToken = '';
-
-  // Token neoar function
   void getToken(int index) {
     setState(() {
       myToken = 'C-0${index + 1}';
     });
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,7 +31,6 @@ class _CanteenPageState extends State<CanteenPage> {
       ),
       body: Column(
         children: [
-          // Token dekhanor box
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
@@ -53,8 +44,6 @@ class _CanteenPageState extends State<CanteenPage> {
               ),
             ),
           ),
-
-          // Food list
           Expanded(
             child: ListView.builder(
               itemCount: foods.length,
