@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'models/book.dart';
 
-
-
 class LibraryPage extends StatefulWidget {
   const LibraryPage({super.key});
 
@@ -10,41 +8,29 @@ class LibraryPage extends StatefulWidget {
   State<LibraryPage> createState() => _LibraryPageState();
 }
 
-
-
 class _LibraryPageState extends State<LibraryPage> {
-
+  // Search box-er text
   String searchQuery = '';
 
-
-
-
-  // active ticket er info
+  // Active ticket info
   bool hasTicket = true;
   String ticketNumber = 'A-045';
   String activeBook = 'Introduction to FLUTTER';
 
-
-
-
-  // sob boi er list
+  // Library-r boi er list
   final List<Book> books = const [
-    Book('Introduction to EEE', 'Thomas H. Cormen', 'Available',00),
-    Book('Database System Data Structure', 'Abraham Silberschatz', 'Available', 2),
+    Book('Introduction to EEE', 'Thomas', 'Available', 0),
+    Book('Database System Data Structure', 'Abraham Silb', 'Available', 2),
     Book('Introduction to DLD', 'Abraham Silberschatz', 'Unavailable', 10),
     Book('Introduction to MATH', 'Andrew S. Tanenbaum', 'Available', 1),
     Book('Introduction to HUM', 'Stuart Russell', 'Available', 25),
   ];
 
-
-
-
-  // ticket cancel korar jonno popup
+  // Ticket cancel korar confirm dialog
   void showCancelTicketDialog() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
         title: const Text('Cancel Ticket?'),
         content: const Text('Do you want to cancel this ticket?'),
         actions: [
@@ -69,26 +55,23 @@ class _LibraryPageState extends State<LibraryPage> {
     );
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
-
-    final filteredBooks = books.where((b) {    // search filter logic
-
-      final query = searchQuery.toLowerCase();
-      return b.title.toLowerCase().contains(query) ||
-          b.author.toLowerCase().contains(query);
+    // Search query diye boi filter kora
+    final filteredBooks = books.where((book) {
+      String query = searchQuery.toLowerCase();
+      bool titleMatch = book.title.toLowerCase().contains(query);
+      bool authorMatch = book.author.toLowerCase().contains(query);
+      return titleMatch || authorMatch;
     }).toList();
 
-
-
-
     return Scaffold(
-      backgroundColor: Colors.blueGrey.shade50,
+      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
-        title: const Text('Library Services', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Library Services',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
       ),
@@ -97,11 +80,12 @@ class _LibraryPageState extends State<LibraryPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
-            // library status card
+            // Library open status card
             Card(
               color: Colors.green.shade800,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(17)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: const Padding(
                 padding: EdgeInsets.all(20),
                 child: Row(
@@ -110,25 +94,41 @@ class _LibraryPageState extends State<LibraryPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('CENTRAL LIBRARY', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                        Text(
+                          'CENTRAL LIBRARY',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         SizedBox(height: 4),
-                        Text('Hours: 8:00 AM - 8:00 PM', style: TextStyle(color: Colors.white, fontSize: 13)),
+                        Text(
+                          'Hours: 8:00 AM - 8:00 PM',
+                          style: TextStyle(color: Colors.white, fontSize: 13),
+                        ),
                       ],
                     ),
-                    Text('-> Open Now', style: TextStyle(color: Colors.lightGreenAccent,fontSize: 25, fontWeight: FontWeight.bold)),
+                    Text(
+                      'Open Now',
+                      style: TextStyle(
+                        color: Colors.lightGreenAccent,
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
               ),
             ),
 
-
-
-
             const SizedBox(height: 14),
 
-            // seat count
+            // Available seats card
             Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -137,8 +137,20 @@ class _LibraryPageState extends State<LibraryPage> {
                     const Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text('Available Seats', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        Text('42 / 100', style: TextStyle(color: Colors.black38, fontWeight: FontWeight.bold)),
+                        Text(
+                          'Available Seats',
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        Text(
+                          '42 / 100',
+                          style: TextStyle(
+                            color: Colors.black38,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -156,50 +168,71 @@ class _LibraryPageState extends State<LibraryPage> {
               ),
             ),
 
-
-
-
             const SizedBox(height: 14),
 
-            // user er ticket thakle show korbe
+            // Active ticket card (only shown if user has a ticket)
             if (hasTicket)
               Card(
-                color: Colors.green.shade100,
+                color: Colors.green.shade50,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
+                  borderRadius: BorderRadius.circular(16),
                   side: const BorderSide(color: Colors.green),
                 ),
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical:10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 10,
+                  ),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('TICKET #$ticketNumber', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.green)),
+                          Text(
+                            'TICKET #$ticketNumber',
+                            style: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                          ),
                           TextButton(
                             onPressed: showCancelTicketDialog,
-                            child: const Text('Cancel Ticket', style: TextStyle(color: Colors.red)),
+                            child: const Text(
+                              'Cancel Ticket',
+                              style: TextStyle(color: Colors.red),
+                            ),
                           ),
                         ],
                       ),
-                      Text('Book: $activeBook', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                      Text(
+                        'Book: $activeBook',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 14,
+                        ),
+                      ),
                       const SizedBox(height: 4),
-                      const Text('Queue: #12', style: TextStyle(fontSize: 13, color: Colors.black54)),
+                      const Text(
+                        'Queue: #12',
+                        style: TextStyle(fontSize: 13, color: Colors.black54),
+                      ),
                     ],
                   ),
                 ),
               ),
 
-
-
-
             const SizedBox(height: 16),
 
-            // search box
-            const Text('Books>>>', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            // Book search section
+            const Text(
+              'Check Book Availability',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            ),
             const SizedBox(height: 10),
+
+            // Search box
             TextField(
               onChanged: (value) {
                 setState(() {
@@ -207,55 +240,66 @@ class _LibraryPageState extends State<LibraryPage> {
                 });
               },
               decoration: InputDecoration(
-                hintText: 'Search books >>>',
-                prefixIcon: const Icon(Icons.search, color: Colors.deepPurple),
+                hintText: 'Search by title or author...',
+                prefixIcon: const Icon(Icons.search, color: Colors.green),
                 filled: true,
                 fillColor: Colors.white,
                 contentPadding: const EdgeInsets.symmetric(horizontal: 12),
                 border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide(color: Colors.white70),
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.grey.shade300),
                 ),
                 enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(12),
                   borderSide: BorderSide(color: Colors.grey.shade300),
                 ),
               ),
             ),
 
-
-
-
             const SizedBox(height: 14),
 
-            // book list cards
+            // Book list
             for (var book in filteredBooks)
               Card(
-                margin: const EdgeInsets.only(bottom: 5),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
+                margin: const EdgeInsets.only(bottom: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
                 child: ListTile(
                   leading: CircleAvatar(
-                    backgroundColor: Colors.lightGreenAccent.shade200,
+                    backgroundColor: Colors.green.shade50,
                     child: const Icon(Icons.menu_book, color: Colors.green),
                   ),
-                  title: Text(book.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                  title: Text(
+                    book.title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(book.author, style: const TextStyle(fontSize: 12)),
+                      Text(
+                        book.author,
+                        style: const TextStyle(fontSize: 12),
+                      ),
                       Text(
                         book.status,
                         style: TextStyle(
-                          color: book.status == 'Available' ? Colors.green : Colors.red,
+                          color: book.status == 'Available'
+                              ? Colors.green
+                              : Colors.red,
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
                         ),
                       ),
                     ],
                   ),
                   trailing: ElevatedButton(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: book.status == 'Available' ? Colors.green : Colors.grey.shade200,
+                      backgroundColor: book.status == 'Available'
+                          ? Colors.green
+                          : Colors.grey.shade300,
                       foregroundColor: Colors.white,
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                     ),
@@ -268,7 +312,10 @@ class _LibraryPageState extends State<LibraryPage> {
                             });
                           }
                         : null,
-                    child: Text(book.status == 'Available' ? 'Get Ticket' : 'Unavailable', style: const TextStyle(fontSize: 12)),
+                    child: Text(
+                      book.status == 'Available' ? 'Get Ticket' : 'Unavailable',
+                      style: const TextStyle(fontSize: 12),
+                    ),
                   ),
                 ),
               ),
