@@ -124,7 +124,7 @@ class _LibraryPageState extends State<LibraryPage> {
             Card(
               color: Colors.green.shade800,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16)),
+                  borderRadius: BorderRadius.circular(22)),elevation: 10,
               child: const Padding(
                 padding: EdgeInsets.all(20),
                 child: Row(
@@ -139,9 +139,9 @@ class _LibraryPageState extends State<LibraryPage> {
                                 fontSize: 18,
                                 fontWeight: FontWeight.bold)),
                         SizedBox(height: 4),
-                        Text('Hours: 8:00 AM - 8:00 PM',
+                        Text('Hours: 10:00 AM - 6:00 PM',
                             style: TextStyle(
-                                color: Colors.white70, fontSize: 13)),
+                                color: Colors.white70, fontSize: 15)),
                       ],
                     ),
                     Text('Open Now',
@@ -161,9 +161,9 @@ class _LibraryPageState extends State<LibraryPage> {
               Card(
                 color: Colors.green.shade50,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  side: const BorderSide(color: Colors.green),
-                ),
+                  borderRadius: BorderRadius.circular(32),
+                  side: const BorderSide(color: Colors.brown),
+                ),elevation: 10,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -175,7 +175,7 @@ class _LibraryPageState extends State<LibraryPage> {
                           const Text('YOUR TICKET',
                               style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.green)),
+                                  color: Colors.green,  )),
                           TextButton(
                             onPressed: cancelTicket,
                             child: const Text('Cancel Ticket',
@@ -185,7 +185,7 @@ class _LibraryPageState extends State<LibraryPage> {
                       ),
                       Text('Book: $ticketBookName',
                           style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 16)),
+                              fontWeight: FontWeight.bold, color: Colors.black,fontSize: 20)),
                       const SizedBox(height: 4),
                       Text('People in queue: $serialNumber'),
                     ],
@@ -193,10 +193,10 @@ class _LibraryPageState extends State<LibraryPage> {
                 ),
               ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: 22),
 
-            const Text('Book Availability',
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+             Text('Book Availability >>',
+                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold,color: Colors.green.shade900  ,),),
             const SizedBox(height: 10),
 
             if (bookTitles.isEmpty) const Text('Loading books...'),
