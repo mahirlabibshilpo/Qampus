@@ -44,7 +44,7 @@ class HomePage extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.logout),
+            icon:  Icon(Icons.logout),
             tooltip: 'Logout',
             onPressed: () => showLogoutDialog(context),
           ),
@@ -56,69 +56,74 @@ class HomePage extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [ // User profile card
             Card(
-              elevation: 10,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
+                borderRadius: BorderRadius.circular(22),
+              ),    elevation: 10,
+
               color: Colors.green.shade50,
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(22.0),
                 child: Row(
                   children: [
                     const CircleAvatar(
-                      radius: 28,
+                      radius: 35,
                       backgroundColor: Colors.green,
-                      child: Icon(Icons.person, color: Colors.white, size: 32),
+                      child: Icon(Icons.face_unlock_rounded, color: Colors.lightGreenAccent, size:50),
                     ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            'Welcome to QAMPUS!',
-                            style: TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.green,
-                            ),
+                    const SizedBox(width: 18),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          'Welcome to QAMPUS!',
+                          style: TextStyle(
+                            fontSize: 22,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.green,
                           ),
-                          const SizedBox(height: 4),
-                          Text(
-                            userEmail,
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                            ),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          userEmail,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
                           ),
-                          const SizedBox(height: 2),
-                          const Text(
-                            'Smart Access, Better Campus',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.black54,
-                            ),
+                        ),
+                        const SizedBox(height: 2),
+                        const Text(
+                          'Hear you go! Find the',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.black54,
                           ),
-                        ],
-                      ),
+                        ),
+                        const Text(
+                          'Smart Access, Better Campus',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.black54,
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: 28),
 
             // Section title
             const Text(
-              'Campus Services',
+              'Campus Services>>',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 25,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 18),
 
             // Service cards
             serviceCard(
@@ -162,7 +167,7 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  // Each service card - reusable widget
+  // Each service card - reusable widget aita diyei sob card call debo
   Widget serviceCard({
     required BuildContext context,
     required IconData icon,
@@ -171,22 +176,23 @@ class HomePage extends StatelessWidget {
     required Widget page,
   }) {
     return Card(
-      elevation: 2,
-      margin: const EdgeInsets.only(bottom: 12),
+      elevation: 8,
+      margin: const EdgeInsets.all(8),
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(18),
       ),
       child: ListTile(
         leading: CircleAvatar(
-          backgroundColor: Colors.green.shade50,
-          child: Icon(icon, color: Colors.green.shade700),
+          radius:40,
+          backgroundColor: Colors.green.shade100,
+          child: Icon(icon, color: Colors.green.shade700,size:25),
         ),
         title: Text(
           title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
+          style: const TextStyle(fontWeight: FontWeight.bold)
         ),
         subtitle: Text(subtitle),
-        trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+        trailing: const Icon(Icons.arrow_circle_right_outlined, size: 22),
         onTap: () {
           Navigator.push(
             context,
