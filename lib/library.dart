@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'models/book.dart';
-
-
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'auth_service.dart';
 
 class LibraryPage extends StatefulWidget {
   const LibraryPage({super.key});
@@ -10,85 +10,135 @@ class LibraryPage extends StatefulWidget {
   State<LibraryPage> createState() => _LibraryPageState();
 }
 
-
-
 class _LibraryPageState extends State<LibraryPage> {
+  // Library er boi er data store korar list
+  List<String> bookTitles = [];
+  List<String> bookAuthors = [];
+  List<bool> bookAvailable = [];
 
-  String searchQuery = '';
+  // Active ticket ebong queue status er state
+  bool hasTicket = false;
+  String ticketBookName = '';
+  String ticketId = '';
+  int serialNumber = 0;
 
-
-
-
-  // active ticket er info
-  bool hasTicket = true;
-  String ticketNumber = 'A-045';
-  String activeBook = 'Introduction to FLUTTER';
-
-
-
-
-  // sob boi er list
-  final List<Book> books = const [
-    Book('Introduction to EEE', 'Thomas H. Cormen', 'Available',00),
-    Book('Database System Data Structure', 'Abraham Silberschatz', 'Available', 2),
-    Book('Introduction to DLD', 'Abraham Silberschatz', 'Unavailable', 10),
-    Book('Introduction to MATH', 'Andrew S. Tanenbaum', 'Available', 1),
-    Book('Introduction to HUM', 'Stuart Russell', 'Available', 25),
-  ];
-
-
-
-
-  // ticket cancel korar jonno popup
-  void showCancelTicketDialog() {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(60)),
-        title: const Text('Cancel Ticket?'),
-        content: const Text('Do you want to cancel this ticket?'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-            },
-            child: const Text('No'),
-          ),
-          ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            onPressed: () {
-              setState(() {
-                hasTicket = false;
-              });
-              Navigator.pop(context);
-            },
-            child: const Text('Yes', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    );
+  @override
+  void initState() {
+    super.initState();
+    loadBooks();
+    loadMyTicket();
   }
 
+  // Firebase Firestore theke real-time e boi er list load kora
+  void loadBooks() {
+    FirebaseFirestore.instance
+        .collection('books')
+        .snapshots()
+        .listen((QuerySnapshot snapshot) {
+      final List<String> loadedTitles = [];
+      final List<String> loadedAuthors = [];
+      final List<bool> loadedAvailability = [];
 
+      for (var doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final String title = data['title']?.toString() ?? '';
+        final String author = data['author']?.toString() ?? '';
+        final bool isAvailable = data['isAvailable'] == true;
 
+        if (loadedTitles.contains(title)) continue;
+
+        loadedTitles.add(title);
+        loadedAuthors.add(author);
+        loadedAvailability.add(isAvailable);
+      }
+
+      if (mounted) {
+        setState(() {
+          bookTitles = loadedTitles;
+          bookAuthors = loadedAuthors;
+          bookAvailable = loadedAvailability;
+        });
+      }
+    });
+  }
+
+  // Current user er active ticket check kora ebong serial number count kora
+  void loadMyTicket() {
+    final String myEmail = FirebaseAuth.instance.currentUser?.email ??
+        AuthService().currentUserEmail ??
+        '';
+
+    FirebaseFirestore.instance
+        .collection('tickets')
+        .snapshots()
+        .listen((QuerySnapshot snapshot) {
+      bool found = false;
+      String book = '';
+      String id = '';
+      int serial = 0;
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        if (data['userId'] == myEmail && data['status'] == 'active') {
+          found = true;
+          book = data['bookTitle']?.toString() ?? '';
+          id = doc.id;
+        }
+      }
+
+      // Same boi er queue te active user koyjon ache tar serial count kora
+      if (found) {
+        for (var doc in snapshot.docs) {
+          final data = doc.data() as Map<String, dynamic>;
+          if (data['bookTitle'] == book && data['status'] == 'active') {
+            serial++;
+          }
+        }
+      }
+
+      if (mounted) {
+        setState(() {
+          hasTicket = found;
+          ticketBookName = book;
+          ticketId = id;
+          serialNumber = serial;
+        });
+      }
+    });
+  }
+
+  // Boi collect korar jonno Firestore e notun ticket book kora
+  void getTicket(String bookTitle) {
+    final String myEmail = FirebaseAuth.instance.currentUser?.email ??
+        AuthService().currentUserEmail ??
+        '';
+
+    FirebaseFirestore.instance.collection('tickets').add({
+      'userId': myEmail,
+      'bookTitle': bookTitle,
+      'timestamp': FieldValue.serverTimestamp(),
+      'status': 'active',
+    });
+  }
+
+  // Current active ticket cancel kora
+  void cancelTicket() {
+    if (ticketId.isEmpty) return;
+
+    FirebaseFirestore.instance.collection('tickets').doc(ticketId).update({
+      'status': 'cancelled',
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-
-    final filteredBooks = books.where((b) {    // search filter logic
-
-      final query = searchQuery.toLowerCase();
-      return b.title.toLowerCase().contains(query) ||
-          b.author.toLowerCase().contains(query);
-    }).toList();
-
-
-
-
     return Scaffold(
-      backgroundColor: Colors.blueGrey.shade50,
+      backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
-        title: const Text('Library Services', style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Library Services',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
       ),
@@ -97,11 +147,13 @@ class _LibraryPageState extends State<LibraryPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
-            // library status card
+            // Library status card: Opening hours ebong current status
             Card(
               color: Colors.green.shade800,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(17)),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(22),
+              ),
+              elevation: 10,
               child: const Padding(
                 padding: EdgeInsets.all(20),
                 child: Row(
@@ -110,45 +162,30 @@ class _LibraryPageState extends State<LibraryPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('CENTRAL LIBRARY', style: TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
+                        Text(
+                          'CENTRAL LIBRARY',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         SizedBox(height: 4),
-                        Text('Hours: 8:00 AM - 8:00 PM', style: TextStyle(color: Colors.white, fontSize: 13)),
+                        Text(
+                          'Hours: 10:00 AM - 6:00 PM',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 15,
+                          ),
+                        ),
                       ],
                     ),
-                    Text('-> Open Now', style: TextStyle(color: Colors.lightGreenAccent,fontSize: 25, fontWeight: FontWeight.bold)),
-                  ],
-                ),
-              ),
-            ),
-
-
-
-
-            const SizedBox(height: 14),
-
-            // seat count
-            Card(
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-              child: Padding(
-                padding: const EdgeInsets.all(20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Text('Available Seats', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
-                        Text('42 / 100', style: TextStyle(color: Colors.black38, fontWeight: FontWeight.bold)),
-                      ],
-                    ),
-                    const SizedBox(height: 10),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
-                      child: LinearProgressIndicator(
-                        value: 0.42,
-                        minHeight: 11,
-                        backgroundColor: Colors.teal.shade100,
-                        color: Colors.green.shade700,
+                    Text(
+                      'Open Now',
+                      style: TextStyle(
+                        color: Colors.lightGreenAccent,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
                   ],
@@ -156,120 +193,95 @@ class _LibraryPageState extends State<LibraryPage> {
               ),
             ),
 
-
-
-
             const SizedBox(height: 14),
 
-            // user er ticket thakle show korbe
+            // User er jodi kono active ticket thake taile ticket card show korbe
             if (hasTicket)
               Card(
-                color: Colors.green.shade100,
+                color: Colors.green.shade50,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  side: const BorderSide(color: Colors.green),
+                  borderRadius: BorderRadius.circular(32),
+                  side: const BorderSide(color: Colors.brown),
                 ),
+                elevation: 10,
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 25, vertical:10),
+                  padding: const EdgeInsets.all(16),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Text('TICKET #$ticketNumber', style: const TextStyle(fontSize: 15, fontWeight: FontWeight.bold, color: Colors.green)),
+                          const Text(
+                            'YOUR TICKET',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                          ),
                           TextButton(
-                            onPressed: showCancelTicketDialog,
-                            child: const Text('Cancel Ticket', style: TextStyle(color: Colors.red)),
+                            onPressed: cancelTicket,
+                            child: const Text(
+                              'Cancel Ticket',
+                              style: TextStyle(color: Colors.red),
+                            ),
                           ),
                         ],
                       ),
-                      Text('Book: $activeBook', style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
-                      const SizedBox(height: 4),
-                      const Text('Queue: #12', style: TextStyle(fontSize: 13, color: Colors.black54)),
-                    ],
-                  ),
-                ),
-              ),
-
-
-
-
-            const SizedBox(height: 16),
-
-            // search box
-            const Text('Books>>>', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 10),
-            TextField(
-              onChanged: (value) {
-                setState(() {
-                  searchQuery = value;
-                });
-              },
-              decoration: InputDecoration(
-                hintText: 'Search books >>>',
-                prefixIcon: const Icon(Icons.search, color: Colors.deepPurple),
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(30),
-                  borderSide: BorderSide(color: Colors.white70),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(20),
-                  borderSide: BorderSide(color: Colors.grey.shade300),
-                ),
-              ),
-            ),
-
-
-
-
-            const SizedBox(height: 14),
-
-            // book list cards
-            for (var book in filteredBooks)
-              Card(
-                margin: const EdgeInsets.only(bottom: 5),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50)),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    backgroundColor: Colors.lightGreenAccent.shade200,
-                    child: const Icon(Icons.menu_book, color: Colors.green),
-                  ),
-                  title: Text(book.title, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(book.author, style: const TextStyle(fontSize: 12)),
                       Text(
-                        book.status,
-                        style: TextStyle(
-                          color: book.status == 'Available' ? Colors.green : Colors.red,
+                        'Book: $ticketBookName',
+                        style: const TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          color: Colors.black,
+                          fontSize: 20,
                         ),
                       ),
+                      const SizedBox(height: 4),
+                      Text('People in queue: $serialNumber'),
                     ],
                   ),
-                  trailing: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: book.status == 'Available' ? Colors.green : Colors.grey.shade200,
-                      foregroundColor: Colors.white,
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                    ),
-                    onPressed: book.status == 'Available'
-                        ? () {
-                            setState(() {
-                              hasTicket = true;
-                              activeBook = book.title;
-                              ticketNumber = 'A-028';
-                            });
-                          }
-                        : null,
-                    child: Text(book.status == 'Available' ? 'Get Ticket' : 'Unavailable', style: const TextStyle(fontSize: 12)),
+                ),
+              ),
+
+            const SizedBox(height: 22),
+
+            Text(
+              'Book Availability >>',
+              style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+                color: Colors.green.shade900,
+              ),
+            ),
+            const SizedBox(height: 10),
+
+            if (bookTitles.isEmpty) const Text('Loading books...'),
+
+            // Available boi gular list render kora
+            for (int i = 0; i < bookTitles.length; i++)
+              Card(
+                child: ListTile(
+                  leading: Icon(
+                    Icons.menu_book,
+                    color: bookAvailable[i] == true
+                        ? Colors.green
+                        : Colors.red,
                   ),
+                  title: Text(bookTitles[i]),
+                  subtitle: Text(bookAuthors[i]),
+                  trailing: bookAvailable[i] == true
+                      ? ElevatedButton(
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.green,
+                            foregroundColor: Colors.white,
+                          ),
+                          onPressed: () => getTicket(bookTitles[i]),
+                          child: const Text('Get Ticket'),
+                        )
+                      : const Text(
+                          'Unavailable',
+                          style: TextStyle(color: Colors.red),
+                        ),
                 ),
               ),
           ],

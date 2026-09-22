@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'auth_service.dart';
 import 'home.dart';
-import 'signup.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -12,81 +12,69 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  // Email and password input controllers
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+  // Password show/hide toggle
   bool isPasswordHidden = true;
 
-  void loginUser() async {
-    String email = emailController.text.trim();
-    String password = passwordController.text.trim();
-
-    if (email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter both Email and Password!'),
-          backgroundColor: Colors.red,
-        ),
-      );
-      return;
-    }
-
-    try {
-      await FirebaseAuth.instance.signInWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-      AuthService().login(email, password);
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Login Successful!'),
-          backgroundColor: Colors.green,
-        ),
-      );
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(
-          builder: (context) => const HomePage(),
-        ),
-      );
-    } catch (e) {
-      // Fallback to local AuthService if Firebase Auth fails or is offline
-      bool isSuccess = AuthService().login(email, password);
-
-      if (!mounted) return;
-      if (isSuccess) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Login Successful!'),
-            backgroundColor: Colors.green,
-          ),
-        );
-
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const HomePage(),
-          ),
-        );
-      } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Invalid email or password.'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
+  // Free memory when page is closed
   @override
   void dispose() {
     emailController.dispose();
     passwordController.dispose();
     super.dispose();
+  }
+
+  // Show a small message at the bottom of the screen
+  void showMessage(String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? Colors.red : Colors.green,
+      ),
+    );
+  }
+
+  // Login button click hobe taile ei function call hobe
+  Future<void> loginUser() async {
+    final email = emailController.text.trim();
+    final password = passwordController.text.trim();
+
+    // Check: Email or password empty?
+    if (email.isEmpty || password.isEmpty) {
+      showMessage('Please enter both Email and Password!', isError: true);
+      return;
+    }
+
+    // First try Firebase login
+    bool loginSuccess = false;
+
+    final result = await FirebaseAuth.instance
+        .signInWithEmailAndPassword(email: email, password: password)
+        .then((value) {
+      AuthService().login(email, password);
+      return true;
+    }).catchError((_) {
+      // Firebase fail korle local AuthService diye check
+      return AuthService().login(email, password);
+    });
+
+    loginSuccess = result;
+
+    if (!mounted) return;
+
+    // Login successful hole HomePage-e jao
+    if (loginSuccess) {
+      showMessage('Login Successful!');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
+    } else {
+      showMessage('Invalid email or password.', isError: true);
+    }
   }
 
   @override
@@ -99,13 +87,14 @@ class _LoginPageState extends State<LoginPage> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
+              // App logo
               Image.asset(
                 'assets/green_environment_logo.png',
                 height: 90,
               ),
-
               const SizedBox(height: 20),
 
+              // Title
               const Text(
                 'LOGIN',
                 style: TextStyle(
@@ -115,9 +104,9 @@ class _LoginPageState extends State<LoginPage> {
                   letterSpacing: 1.5,
                 ),
               ),
-
               const SizedBox(height: 30),
 
+              // Email input
               TextField(
                 controller: emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -128,9 +117,9 @@ class _LoginPageState extends State<LoginPage> {
                   prefixIcon: Icon(Icons.email, color: Colors.green),
                 ),
               ),
-
               const SizedBox(height: 15),
 
+              // Password input
               TextField(
                 controller: passwordController,
                 obscureText: isPasswordHidden,
@@ -141,7 +130,9 @@ class _LoginPageState extends State<LoginPage> {
                   prefixIcon: const Icon(Icons.lock, color: Colors.green),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      isPasswordHidden ? Icons.visibility_off : Icons.visibility,
+                      isPasswordHidden
+                          ? Icons.visibility_off
+                          : Icons.visibility,
                       color: Colors.grey,
                     ),
                     onPressed: () {
@@ -152,28 +143,22 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 10),
 
+              // Forgot password button (future-e kaj korbe)
               Align(
                 alignment: Alignment.centerRight,
                 child: TextButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Password reset feature coming soon!'),
-                      ),
-                    );
-                  },
+                  onPressed: () {},
                   child: const Text(
                     'Forgot Password?',
                     style: TextStyle(color: Colors.green),
                   ),
                 ),
               ),
-
               const SizedBox(height: 15),
 
+              // Login button
               SizedBox(
                 width: double.infinity,
                 height: 48,
@@ -182,7 +167,7 @@ class _LoginPageState extends State<LoginPage> {
                     backgroundColor: Colors.green,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                   ),
                   onPressed: loginUser,
@@ -192,18 +177,11 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                 ),
               ),
-
               const SizedBox(height: 20),
 
+              // Sign up link (future-e kaj korbe)
               GestureDetector(
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SignUpPage(),
-                    ),
-                  );
-                },
+                onTap: () {},
                 child: RichText(
                   text: const TextSpan(
                     text: "Don't have an account? ",
