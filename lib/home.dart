@@ -192,13 +192,15 @@ class HomePage extends StatelessWidget {
           style: const TextStyle(fontWeight: FontWeight.bold)
         ),
         subtitle: Text(subtitle),
-        trailing: const Icon(Icons.arrow_circle_right_outlined, size: 22),
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => page),
-          );
-        },
+        trailing: IconButton(
+          icon: const Icon(Icons.arrow_circle_right_outlined, size: 24),
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => page),
+            );
+          },
+        ),
       ),
     );
   }

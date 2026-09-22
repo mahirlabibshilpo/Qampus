@@ -34,16 +34,16 @@ class _LibraryPageState extends State<LibraryPage> {
     FirebaseFirestore.instance
         .collection('books')
         .snapshots()
-        .listen((QuerySnapshot snapshot) {
+        .listen((snapshot) {
       final List<String> loadedTitles = [];
       final List<String> loadedAuthors = [];
       final List<bool> loadedAvailability = [];
 
-      for (var doc in snapshot.docs) {
-        final data = doc.data() as Map<String, dynamic>;
-        final String title = data['title']?.toString() ?? '';
-        final String author = data['author']?.toString() ?? '';
-        final bool isAvailable = data['isAvailable'] == true;
+      for (int i = 0; i < snapshot.docs.length; i++) {
+        var doc = snapshot.docs[i];
+        String title = doc['title'];
+        String author = doc['author'];
+        bool isAvailable = doc['isAvailable'];
 
         if (loadedTitles.contains(title)) continue;
 
@@ -71,26 +71,26 @@ class _LibraryPageState extends State<LibraryPage> {
     FirebaseFirestore.instance
         .collection('tickets')
         .snapshots()
-        .listen((QuerySnapshot snapshot) {
+        .listen((snapshot) {
       bool found = false;
       String book = '';
       String id = '';
       int serial = 0;
 
-      for (var doc in snapshot.docs) {
-        final data = doc.data() as Map<String, dynamic>;
-        if (data['userId'] == myEmail && data['status'] == 'active') {
+      for (int i = 0; i < snapshot.docs.length; i++) {
+        var doc = snapshot.docs[i];
+        if (doc['userId'] == myEmail && doc['status'] == 'active') {
           found = true;
-          book = data['bookTitle']?.toString() ?? '';
+          book = doc['bookTitle'];
           id = doc.id;
         }
       }
 
       // Same boi er queue te active user koyjon ache tar serial count kora
       if (found) {
-        for (var doc in snapshot.docs) {
-          final data = doc.data() as Map<String, dynamic>;
-          if (data['bookTitle'] == book && data['status'] == 'active') {
+        for (int i = 0; i < snapshot.docs.length; i++) {
+          var doc = snapshot.docs[i];
+          if (doc['bookTitle'] == book && doc['status'] == 'active') {
             serial++;
           }
         }
