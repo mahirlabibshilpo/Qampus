@@ -249,12 +249,10 @@ class HomePage extends StatelessWidget {
               Navigator.pop(context);
               await FirebaseAuth.instance.signOut();
               AuthService().logout();
-              if (context.mounted) {
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(builder: (context) => const LoginPage()),
                 );
-              }
             },
             child: const Text('Logout'),
           ),

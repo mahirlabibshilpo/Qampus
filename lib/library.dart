@@ -52,13 +52,13 @@ class _LibraryPageState extends State<LibraryPage> {
         loadedAvailability.add(isAvailable);
       }
 
-      if (mounted) {
+
         setState(() {
           bookTitles = loadedTitles;
           bookAuthors = loadedAuthors;
           bookAvailable = loadedAvailability;
         });
-      }
+
     });
   }
 
@@ -96,14 +96,13 @@ class _LibraryPageState extends State<LibraryPage> {
         }
       }
 
-      if (mounted) {
         setState(() {
           hasTicket = found;
           ticketBookName = book;
           ticketId = id;
           serialNumber = serial;
         });
-      }
+
     });
   }
 
