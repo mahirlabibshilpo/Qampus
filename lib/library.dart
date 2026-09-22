@@ -11,12 +11,12 @@ class LibraryPage extends StatefulWidget {
 }
 
 class _LibraryPageState extends State<LibraryPage> {
-  // বইয়ের তথ্য
-  List bookTitles = [];
-  List bookAuthors = [];
-  List bookAvailable = [];
+  // Library er boi er data store korar list
+  List<String> bookTitles = [];
+  List<String> bookAuthors = [];
+  List<bool> bookAvailable = [];
 
-  // টিকিটের তথ্য
+  // Active ticket ebong queue status er state
   bool hasTicket = false;
   String ticketBookName = '';
   String ticketId = '';
@@ -29,67 +29,90 @@ class _LibraryPageState extends State<LibraryPage> {
     loadMyTicket();
   }
 
-  // ফায়ারবেস থেকে বই আনা
+  // Firebase Firestore theke real-time e boi er list load kora
   void loadBooks() {
-    FirebaseFirestore.instance.collection('books').snapshots().listen((data) {
-      List t = [];
-      List a = [];
-      List av = [];
-      for (int i = 0; i < data.docs.length; i++) {
-        if (t.contains(data.docs[i]['title'])) continue;
-        t.add(data.docs[i]['title']);
-        a.add(data.docs[i]['author']);
-        av.add(data.docs[i]['isAvailable']);
+    FirebaseFirestore.instance
+        .collection('books')
+        .snapshots()
+        .listen((QuerySnapshot snapshot) {
+      final List<String> loadedTitles = [];
+      final List<String> loadedAuthors = [];
+      final List<bool> loadedAvailability = [];
+
+      for (var doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        final String title = data['title']?.toString() ?? '';
+        final String author = data['author']?.toString() ?? '';
+        final bool isAvailable = data['isAvailable'] == true;
+
+        if (loadedTitles.contains(title)) continue;
+
+        loadedTitles.add(title);
+        loadedAuthors.add(author);
+        loadedAvailability.add(isAvailable);
       }
-      setState(() {
-        bookTitles = t;
-        bookAuthors = a;
-        bookAvailable = av;
-      });
+
+      if (mounted) {
+        setState(() {
+          bookTitles = loadedTitles;
+          bookAuthors = loadedAuthors;
+          bookAvailable = loadedAvailability;
+        });
+      }
     });
   }
 
-  // নিজের টিকিট আনা
+  // Current user er active ticket check kora ebong serial number count kora
   void loadMyTicket() {
-    String myEmail = FirebaseAuth.instance.currentUser?.email ??
-        AuthService().currentUserEmail ?? '';
+    final String myEmail = FirebaseAuth.instance.currentUser?.email ??
+        AuthService().currentUserEmail ??
+        '';
 
-    FirebaseFirestore.instance.collection('tickets').snapshots().listen((data) {
+    FirebaseFirestore.instance
+        .collection('tickets')
+        .snapshots()
+        .listen((QuerySnapshot snapshot) {
       bool found = false;
       String book = '';
       String id = '';
       int serial = 0;
 
-      for (int i = 0; i < data.docs.length; i++) {
-        if (data.docs[i]['userId'] == myEmail && data.docs[i]['status'] == 'active') {
+      for (var doc in snapshot.docs) {
+        final data = doc.data() as Map<String, dynamic>;
+        if (data['userId'] == myEmail && data['status'] == 'active') {
           found = true;
-          book = data.docs[i]['bookTitle'];
-          id = data.docs[i].id;
+          book = data['bookTitle']?.toString() ?? '';
+          id = doc.id;
         }
       }
 
-      // সিরিয়াল গোনা
+      // Same boi er queue te active user koyjon ache tar serial count kora
       if (found) {
-        for (int i = 0; i < data.docs.length; i++) {
-          if (data.docs[i]['bookTitle'] == book && data.docs[i]['status'] == 'active') {
+        for (var doc in snapshot.docs) {
+          final data = doc.data() as Map<String, dynamic>;
+          if (data['bookTitle'] == book && data['status'] == 'active') {
             serial++;
           }
         }
       }
 
-      setState(() {
-        hasTicket = found;
-        ticketBookName = book;
-        ticketId = id;
-        serialNumber = serial;
-      });
+      if (mounted) {
+        setState(() {
+          hasTicket = found;
+          ticketBookName = book;
+          ticketId = id;
+          serialNumber = serial;
+        });
+      }
     });
   }
 
-  // টিকিট কাটা
+  // Boi collect korar jonno Firestore e notun ticket book kora
   void getTicket(String bookTitle) {
-    String myEmail = FirebaseAuth.instance.currentUser?.email ??
-        AuthService().currentUserEmail ?? '';
+    final String myEmail = FirebaseAuth.instance.currentUser?.email ??
+        AuthService().currentUserEmail ??
+        '';
+
     FirebaseFirestore.instance.collection('tickets').add({
       'userId': myEmail,
       'bookTitle': bookTitle,
@@ -98,8 +121,10 @@ class _LibraryPageState extends State<LibraryPage> {
     });
   }
 
-  // টিকিট ক্যানসেল
+  // Current active ticket cancel kora
   void cancelTicket() {
+    if (ticketId.isEmpty) return;
+
     FirebaseFirestore.instance.collection('tickets').doc(ticketId).update({
       'status': 'cancelled',
     });
@@ -110,8 +135,10 @@ class _LibraryPageState extends State<LibraryPage> {
     return Scaffold(
       backgroundColor: Colors.grey.shade100,
       appBar: AppBar(
-        title: const Text('Library Services',
-            style: TextStyle(fontWeight: FontWeight.bold)),
+        title: const Text(
+          'Library Services',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Colors.green,
         foregroundColor: Colors.white,
       ),
@@ -120,11 +147,13 @@ class _LibraryPageState extends State<LibraryPage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Library status card
+            // Library status card: Opening hours ebong current status
             Card(
               color: Colors.green.shade800,
               shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(22)),elevation: 10,
+                borderRadius: BorderRadius.circular(22),
+              ),
+              elevation: 10,
               child: const Padding(
                 padding: EdgeInsets.all(20),
                 child: Row(
@@ -133,22 +162,32 @@ class _LibraryPageState extends State<LibraryPage> {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('CENTRAL LIBRARY',
-                            style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold)),
+                        Text(
+                          'CENTRAL LIBRARY',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
                         SizedBox(height: 4),
-                        Text('Hours: 10:00 AM - 6:00 PM',
-                            style: TextStyle(
-                                color: Colors.white70, fontSize: 15)),
+                        Text(
+                          'Hours: 10:00 AM - 6:00 PM',
+                          style: TextStyle(
+                            color: Colors.white70,
+                            fontSize: 15,
+                          ),
+                        ),
                       ],
                     ),
-                    Text('Open Now',
-                        style: TextStyle(
-                            color: Colors.lightGreenAccent,
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold)),
+                    Text(
+                      'Open Now',
+                      style: TextStyle(
+                        color: Colors.lightGreenAccent,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -156,14 +195,15 @@ class _LibraryPageState extends State<LibraryPage> {
 
             const SizedBox(height: 14),
 
-            // Active Ticket card
+            // User er jodi kono active ticket thake taile ticket card show korbe
             if (hasTicket)
               Card(
                 color: Colors.green.shade50,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(32),
                   side: const BorderSide(color: Colors.brown),
-                ),elevation: 10,
+                ),
+                elevation: 10,
                 child: Padding(
                   padding: const EdgeInsets.all(16),
                   child: Column(
@@ -172,20 +212,30 @@ class _LibraryPageState extends State<LibraryPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          const Text('YOUR TICKET',
-                              style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.green,  )),
+                          const Text(
+                            'YOUR TICKET',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.green,
+                            ),
+                          ),
                           TextButton(
                             onPressed: cancelTicket,
-                            child: const Text('Cancel Ticket',
-                                style: TextStyle(color: Colors.red)),
+                            child: const Text(
+                              'Cancel Ticket',
+                              style: TextStyle(color: Colors.red),
+                            ),
                           ),
                         ],
                       ),
-                      Text('Book: $ticketBookName',
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, color: Colors.black,fontSize: 20)),
+                      Text(
+                        'Book: $ticketBookName',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                          fontSize: 20,
+                        ),
+                      ),
                       const SizedBox(height: 4),
                       Text('People in queue: $serialNumber'),
                     ],
@@ -195,20 +245,28 @@ class _LibraryPageState extends State<LibraryPage> {
 
             const SizedBox(height: 22),
 
-             Text('Book Availability >>',
-                style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold,color: Colors.green.shade900  ,),),
+            Text(
+              'Book Availability >>',
+              style: TextStyle(
+                fontSize: 25,
+                fontWeight: FontWeight.bold,
+                color: Colors.green.shade900,
+              ),
+            ),
             const SizedBox(height: 10),
 
             if (bookTitles.isEmpty) const Text('Loading books...'),
 
-            // বইয়ের লিস্ট
+            // Available boi gular list render kora
             for (int i = 0; i < bookTitles.length; i++)
               Card(
                 child: ListTile(
-                  leading: Icon(Icons.menu_book,
-                      color: bookAvailable[i] == true
-                          ? Colors.green
-                          : Colors.red),
+                  leading: Icon(
+                    Icons.menu_book,
+                    color: bookAvailable[i] == true
+                        ? Colors.green
+                        : Colors.red,
+                  ),
                   title: Text(bookTitles[i]),
                   subtitle: Text(bookAuthors[i]),
                   trailing: bookAvailable[i] == true
@@ -220,8 +278,10 @@ class _LibraryPageState extends State<LibraryPage> {
                           onPressed: () => getTicket(bookTitles[i]),
                           child: const Text('Get Ticket'),
                         )
-                      : const Text('Unavailable',
-                          style: TextStyle(color: Colors.red)),
+                      : const Text(
+                          'Unavailable',
+                          style: TextStyle(color: Colors.red),
+                        ),
                 ),
               ),
           ],
